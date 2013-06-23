@@ -78,14 +78,14 @@ void convertLongInt( long int num, byte segData[])
   
   for( int i = 0; i<8; i += 1)
   {
-    digit = num % (modulo*10) / modulo;
+    digit = num % (modulo*10L) / modulo;
     modulo *= 10;
     
     segData[i] = byteToSegDigit( digit);
   }
 }
   
-byte count = 1;
+long int count = 1;
 long int lastTime = 0;
 byte displayData[8] = { 0xFF, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
 void loop()
@@ -94,7 +94,7 @@ void loop()
   convertLongInt( count, displayData);
   displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
   
-  if( millis() > lastTime + 250)
+  if( millis() > lastTime + 10)
   { 
     count += 1;
     lastTime = millis();
