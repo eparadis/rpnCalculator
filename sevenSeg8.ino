@@ -69,18 +69,32 @@ byte byteToSegDigit( byte num )
   byte lookup[] = { 0b11111100, 0b01100000, 0b11011010, 0b11110010, 0b01100110, 0b10110110, 0b10111110, 0b11100000, 0b11111110, 0b11100110 };
   return lookup[num];
 }
-  
-    
 
+// populate the given display buffer with the value of the passed int
+void convertLongInt( long int num, byte segData[])
+{
+  byte digit;
+  long int modulo = 1;
+  
+  for( int i = 0; i<8; i += 1)
+  {
+    digit = num % (modulo*10) / modulo;
+    modulo *= 10;
+    
+    segData[i] = byteToSegDigit( digit);
+  }
+}
+  
 byte count = 1;
+long int lastTime = 0;
 byte displayData[8] = { 0xFF, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-int lastTime = 0;
 void loop()
 {
-  displayData[0] = byteToSegDigit( count);
+  
+  convertLongInt( count, displayData);
   displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
   
-  if( millis() > lastTime + 1000)
+  if( millis() > lastTime + 250)
   { 
     count += 1;
     lastTime = millis();
