@@ -14,26 +14,6 @@ void setup()
   
 }
 
-
-byte count = 1;
-byte digit = 1;
-void loop()
-{
-  resetShiftReg();
-  shiftOutByte( digit);  // digit
-  shiftOutByte( ~count );   // segment (inverted)
-  count = count << 1;
-  if( count == 0)
-  {
-    count = 1;
-    digit = digit << 1;
-  }
-  if( digit == 0)
-    digit = 1;
-  delay(100);
-  
-}
-
 void shiftOutByte( byte b)
 {
   for( int i = 0; i < 8; i += 1)
@@ -45,17 +25,34 @@ void shiftOutByte( byte b)
     b = b >> 1;
   
     digitalWrite( clockPin, LOW);
-    delay(1);
     digitalWrite( clockPin, HIGH);
-    delay(1);  
-    
   }
 }
 
 void resetShiftReg()
 {
   digitalWrite( rclockPin, LOW);
-  delay( 1);
   digitalWrite( rclockPin, HIGH);
-  delay( 1);
+}
+
+// given an array of 8 bytes, populate all the segments of the display
+void displayAllSegments( byte data[] )
+{
+  byte digit = 1;
+  for( byte i = 0; i < 8; i += 1)
+  {
+    resetShiftReg();
+    shiftOutByte( digit);  // digit
+    shiftOutByte( ~data[i] );   // segment (inverted)
+    digit = digit << 1;
+  }  
+}
+
+
+byte count = 1;
+byte digit = 1;
+byte displayData[8] = { 0xFF, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+void loop()
+{
+  displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning  
 }
