@@ -140,7 +140,7 @@ void loop()
   //convertLongInt( count, displayData);
   //convertFloat( sin(count/360.0), displayData);
   //convertFloat( 10.0/(count%10+1) , displayData);
-  convertFloat( pow( 3.14, count/4) , displayData);
+  convertFloat( pow( 3.14, count/4.0) , displayData);
   displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
   
   if( millis() > lastTime + 200)
