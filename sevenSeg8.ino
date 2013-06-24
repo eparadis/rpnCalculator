@@ -78,12 +78,20 @@ void convertLongInt( long int num, byte segData[])
 
 void convertFloat( float num, byte segData[])
 {
+  // if num is too large, display an overflow error indication of sorts
+  if( num > 9999999.0 || num < -999999.0)
+  {
+    for( byte i = 0; i < 8; i += 1)
+      segData[i] = 0b11111101;  // zero with decimal point
+    return;
+  }
+  
   char cbuf[16];
   for( byte i = 0; i < 16; i += 1)
     cbuf[i] = ' ';
   
   // dtostrf(floatVar, minStringWidthIncDecimalPoint, numVarsAfterDecimal, charBuf)
-  dtostrf(num, 8, 3, cbuf);
+  dtostrf(num, 9, 4, cbuf);
   
   byte i = 0;
   byte j = 0;
@@ -128,11 +136,14 @@ long int lastTime = 0;
 byte displayData[8] = { 0xFF, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
 void loop()
 {  
+  blankDisplay( displayData);
   //convertLongInt( count, displayData);
-  convertFloat( sin(count/360.0), displayData);
+  //convertFloat( sin(count/360.0), displayData);
+  //convertFloat( 10.0/(count%10+1) , displayData);
+  convertFloat( pow( 3.14, count/4) , displayData);
   displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
   
-  if( millis() > lastTime + 10)
+  if( millis() > lastTime + 200)
   { 
     count += 1;
     lastTime = millis();
@@ -148,5 +159,5 @@ void setup()
   digitalWrite( rclockPin, HIGH);  // clock reset is active LOW
   digitalWrite( clockPin, LOW);    // shift occurs on rising edge of clock
  
-  blankDisplay( displayData); 
+  //blankDisplay( displayData); 
 }
