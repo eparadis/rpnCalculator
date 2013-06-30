@@ -151,6 +151,41 @@ byte scanKeypad()
   else 
     return i-1;
 }
+
+#define K_ENTER 3
+#define K_FN 7
+#define K_DIV 12
+#define K_MULT 13
+#define K_SUB 14
+#define K_ADD 15
+#define K_NOKEY 16
+
+byte isDigitScancode( byte code)
+{
+  switch( code) {
+    case K_ENTER:
+    case K_FN:
+    case K_DIV:
+    case K_MULT:
+    case K_SUB:
+    case K_ADD:
+      return false;
+      break;
+    default:
+      return true;
+      break;
+  }
+}
+
+byte scancodeToDigit( byte code)
+{ //0  1  2  3   4  5  6  7   8  9  10 11  - scan code
+  //9, 6, 3, En, 8, 5, 2, Fn, 7, 4, 1, 0   - digit
+  byte lookup[] = { 9, 6, 3, -1, 8, 5, 2, -1, 7, 4, 1, 0 };
+  if( code < 12 && code != 7 && code != 3)
+    return lookup[code];
+  else
+    return -1;  // error or something
+}
   
 long int count = 1;
 long int lastTime = 0;
@@ -166,23 +201,27 @@ void loop()
   // detect/debounce keypresses
   byte newKey = scanKeypad();
   
-  if( newKey == 16 && currentKeypress != 16)  // we let go of a button
+  if( newKey == K_NOKEY && currentKeypress != K_NOKEY)  // we let go of a button
   {
     if( millis() - keyDownTime > 100)  // the key was held off long enough to do something
     {
-      // a sort of 'typing in numbers' effect
-      accumulator *= 10L;  // shift the digits left
-      accumulator += (long int)currentKeypress;  // add in the new digit
-      accumulator = accumulator % 1000000L;  // drop extreneous digits
+      if( isDigitScancode( currentKeypress))
+      {
+        // a sort of 'typing in numbers' effect
+        accumulator *= 10L;  // shift the digits left
+        accumulator += (long int) scancodeToDigit(currentKeypress);  // add in the new digit
+        accumulator = accumulator % 100000000L;  // drop extreneous digits
+      } else
+        accumulator = 0;
     }
     currentKeypress = newKey;  // which should be 16
   } else 
-  if( newKey != 16 && currentKeypress == 16)  // we pressed a button
+  if( newKey != K_NOKEY && currentKeypress == K_NOKEY)  // we pressed a button
   {
     keyDownTime = millis();
     currentKeypress = newKey;
   } else
-  if( newKey != 16 && currentKeypress != 16)  // we've 'switched' buttons somehow
+  if( newKey != K_NOKEY && currentKeypress != K_NOKEY)  // we've 'switched' buttons somehow
   {
     // register the new key, i guess
     keyDownTime - millis();
