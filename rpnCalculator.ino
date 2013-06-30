@@ -218,9 +218,10 @@ byte scancodeToDigit( byte code)
 long int count = 1;
 long int lastTime = 0;
 byte displayData[8] = { 0xFF, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-long int stack[3] = {12345678L, 0L, 0L};
+long int stack[3] = {0L, 0L, 0L};
 byte currentKeypress = 16;  // nothing
 long int keyDownTime = 0;
+byte startNewEntry = true;
 
 void loop()
 {  
@@ -235,6 +236,15 @@ void loop()
     {
       if( isDigitScancode( currentKeypress))
       {
+        if( startNewEntry)
+        {
+          // push the current entry up
+          stack[2] = stack[1];
+          stack[1] = stack[0];
+          stack[0] = 0;
+          // but then we'll be entering something, so don't do this again
+          startNewEntry = false;
+        }
         // a sort of 'typing in numbers' effect
         stack[0] *= 10L;  // shift the digits left
         stack[0] += (long int) scancodeToDigit(currentKeypress);  // add in the new digit
@@ -249,21 +259,25 @@ void loop()
         stack[0] += stack[1];
         stack[1] = stack[2];
         stack[2] = 0L;
+        startNewEntry = true; // after an operation, we want a keypress to start a new entry; current TOS is preserved by being pushed up
       } else if( currentKeypress == K_MULT )
       {
         stack[0] *= stack[1];
         stack[1] = stack[2];
         stack[2] = 0L;
+        startNewEntry = true;
       } else if( currentKeypress == K_SUB )
       {
         stack[0] = stack[1] - stack[0];
         stack[1] = stack[2];
         stack[2] = 0L;
+        startNewEntry = true;
       } else if( currentKeypress == K_DIV )
       {
         stack[0] = stack[1] / stack[0];
         stack[1] = stack[2];
         stack[2] = 0L;
+        startNewEntry = true;
       }
     
     }
