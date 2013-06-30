@@ -66,12 +66,26 @@ void convertLongInt( long int num, byte segData[])
   byte digit;
   long int modulo = 1;
   
+  // special case for 0
+  if( num == 0)
+  {
+    //just light zero on the LSD
+    segData[0] = 0b11111100;
+    return;
+  }
+  
+  
   for( int i = 0; i<8; i += 1)
   {
-    digit = num % (modulo*10L) / modulo;
-    modulo *= 10L;
+    if( num < modulo && num != 0)  // we're out of digits so blank the current digit
+    {
+      segData[i] = 0b00000000;
+    } else {
+      digit = num % (modulo*10L) / modulo;
+      modulo *= 10L;
     
-    segData[i] = byteToSegDigit( digit);
+      segData[i] = byteToSegDigit( digit);
+    }
   }
 }
 
@@ -132,9 +146,11 @@ void blankDisplay( byte segData[])
 
 byte scanKeypad()
 {
-  int val = analogRead(keypadPin) / 10;
+  int val = analogRead(keypadPin);
 
-  byte buttonValues[] = { 0, 4, 8, 13, 18, 22, 27, 31, 36, 41, 45, 50, 54, 59, 64, 68, 73, 1023 };  // the 1023 is to make sure we never go out of range
+  //byte buttonValues[] = { 0, 4,  8, 13, 18, 22, 27, 31, 36, 41, 45, 50, 54, 59, 64, 68, 73, 255 };  // the 255 is to make sure we never go out of range
+  //byte buttonValues[] =   { 0, 6, 12, 19, 25, 31, 37, 44, 50, 57, 63, 70, 76, 82, 89, 96, 102, 255 };
+  int buttonValues[] = { 0, 61, 125, 190, 251, 314, 378, 444, 507, 573, 639, 700, 763, 829, 895, 961, 1023, 9999};
  
   // find which lookup values we're between 
   byte i = 0;
@@ -203,7 +219,7 @@ void loop()
   
   if( newKey == K_NOKEY && currentKeypress != K_NOKEY)  // we let go of a button
   {
-    if( millis() - keyDownTime > 100)  // the key was held off long enough to do something
+    if( millis() - keyDownTime > 50)  // the key was held off long enough to do something
     {
       if( isDigitScancode( currentKeypress))
       {
@@ -254,6 +270,7 @@ void loop()
   }
   convertLongInt( stack[0], displayData);
   
+  //delay(500); blankDisplay( displayData); convertLongInt( analogRead(0), displayData);  // keypad debugging
   displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
   
   if( millis() > lastTime + 200)
