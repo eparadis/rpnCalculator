@@ -190,7 +190,7 @@ byte scancodeToDigit( byte code)
 long int count = 1;
 long int lastTime = 0;
 byte displayData[8] = { 0xFF, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-long int accumulator = 0;
+long int stack[3] = {0L, 0L, 0L};
 byte currentKeypress = 16;  // nothing
 long int keyDownTime = 0;
 
@@ -208,11 +208,20 @@ void loop()
       if( isDigitScancode( currentKeypress))
       {
         // a sort of 'typing in numbers' effect
-        accumulator *= 10L;  // shift the digits left
-        accumulator += (long int) scancodeToDigit(currentKeypress);  // add in the new digit
-        accumulator = accumulator % 100000000L;  // drop extreneous digits
-      } else
-        accumulator = 0;
+        stack[0] *= 10L;  // shift the digits left
+        stack[0] += (long int) scancodeToDigit(currentKeypress);  // add in the new digit
+        stack[0] = stack[0] % 100000000L;  // drop extreneous digits
+      } else if( currentKeypress == K_ENTER )
+      {
+        stack[2] = stack[1];
+        stack[1] = stack[0];
+        stack[0] = 0L;
+      } else if(  currentKeypress == K_ADD )
+      {
+        stack[0] += stack[1];
+        stack[1] = stack[2];
+        stack[2] = 0L;
+      }
     }
     currentKeypress = newKey;  // which should be 16
   } else 
@@ -227,7 +236,7 @@ void loop()
     keyDownTime - millis();
     currentKeypress = newKey;
   }
-  convertLongInt( accumulator, displayData);
+  convertLongInt( stack[0], displayData);
   
   displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
   
