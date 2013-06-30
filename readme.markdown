@@ -15,6 +15,8 @@ TODO
 - function key for extended operations
 - extended functions: decimal point, square, square root, multiplicative inverse, additive inverse, power
 - store stack on shutdown
+- clear entry (clear entry is currently performed by entering eight zeros)
+- backspace/rub digit (remove the last entered digit)
 - power saving auto-shutoff
 - stack operations: rotate down, swap x-y
 - view/scroll stack
