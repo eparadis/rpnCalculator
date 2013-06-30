@@ -69,7 +69,7 @@ void convertLongInt( long int num, byte segData[])
   for( int i = 0; i<8; i += 1)
   {
     digit = num % (modulo*10L) / modulo;
-    modulo *= 10;
+    modulo *= 10L;
     
     segData[i] = byteToSegDigit( digit);
   }
@@ -155,14 +155,41 @@ byte scanKeypad()
 long int count = 1;
 long int lastTime = 0;
 byte displayData[8] = { 0xFF, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+long int accumulator = 0;
+byte currentKeypress = 16;  // nothing
+long int keyDownTime = 0;
+
 void loop()
 {  
   blankDisplay( displayData);
-  //convertLongInt( count, displayData);
-  //convertFloat( sin(count/360.0), displayData);
-  //convertFloat( 10.0/(count%10+1) , displayData);
-  //convertFloat( pow( 3.14, count/4.0) , displayData);
-  convertLongInt( analogRead(keypadPin)/10 + (int)scanKeypad()*1000, displayData);
+
+  // detect/debounce keypresses
+  byte newKey = scanKeypad();
+  
+  if( newKey == 16 && currentKeypress != 16)  // we let go of a button
+  {
+    if( millis() - keyDownTime > 100)  // the key was held off long enough to do something
+    {
+      // a sort of 'typing in numbers' effect
+      accumulator *= 10L;  // shift the digits left
+      accumulator += (long int)currentKeypress;  // add in the new digit
+      accumulator = accumulator % 1000000L;  // drop extreneous digits
+    }
+    currentKeypress = newKey;  // which should be 16
+  } else 
+  if( newKey != 16 && currentKeypress == 16)  // we pressed a button
+  {
+    keyDownTime = millis();
+    currentKeypress = newKey;
+  } else
+  if( newKey != 16 && currentKeypress != 16)  // we've 'switched' buttons somehow
+  {
+    // register the new key, i guess
+    keyDownTime - millis();
+    currentKeypress = newKey;
+  }
+  convertLongInt( accumulator, displayData);
+  
   displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
   
   if( millis() > lastTime + 200)
