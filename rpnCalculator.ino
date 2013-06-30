@@ -221,7 +221,23 @@ void loop()
         stack[0] += stack[1];
         stack[1] = stack[2];
         stack[2] = 0L;
+      } else if( currentKeypress == K_MULT )
+      {
+        stack[0] *= stack[1];
+        stack[1] = stack[2];
+        stack[2] = 0L;
+      } else if( currentKeypress == K_SUB )
+      {
+        stack[0] = stack[1] - stack[0];
+        stack[1] = stack[2];
+        stack[2] = 0L;
+      } else if( currentKeypress == K_DIV )
+      {
+        stack[0] = stack[1] / stack[0];
+        stack[1] = stack[2];
+        stack[2] = 0L;
       }
+    
     }
     currentKeypress = newKey;  // which should be 16
   } else 
