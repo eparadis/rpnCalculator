@@ -28,15 +28,27 @@ void resetShiftReg()
 // given an array of 8 bytes, populate all the segments of the display
 void displayAllSegments( byte data[] )
 {
-  byte digit = 1;
+  byte digit = 0b00000001;
   for( byte i = 0; i < 8; i += 1)
   {
     resetShiftReg();
     shiftOutByte( digit);  // digit
     shiftOutByte( ~data[i] );   // segment (inverted)
     digit = digit << 1;
+    delay(1);  // causes the display to be slow enough that computations don't affect brightness
   }  
 }
+
+// display the next digit when called so we can split up the display scanning more evenly
+byte currentDisplayDigit = 0;
+void displayNextDigit( byte data[])
+{
+  resetShiftReg();
+  shiftOutByte( 0x01 << currentDisplayDigit );
+  shiftOutByte( ~data[ currentDisplayDigit]);
+  currentDisplayDigit = (currentDisplayDigit + 1) % 8;
+}
+
 
 /*
 MSB is A
@@ -206,7 +218,7 @@ byte scancodeToDigit( byte code)
 long int count = 1;
 long int lastTime = 0;
 byte displayData[8] = { 0xFF, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-long int stack[3] = {0L, 0L, 0L};
+long int stack[3] = {12345678L, 0L, 0L};
 byte currentKeypress = 16;  // nothing
 long int keyDownTime = 0;
 
@@ -271,7 +283,8 @@ void loop()
   convertLongInt( stack[0], displayData);
   
   //delay(500); blankDisplay( displayData); convertLongInt( analogRead(0), displayData);  // keypad debugging
-  displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
+  //displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
+  displayNextDigit( displayData);
   
   if( millis() > lastTime + 200)
   { 
