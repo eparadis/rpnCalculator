@@ -20,6 +20,7 @@ TODO
 - view/scroll stack
 - floating point math (easy but needs decimal point 'function' key)
 - floating point display optimization
+- display brightness control
 
 PIE-IN-THE-SKY
 --------------
