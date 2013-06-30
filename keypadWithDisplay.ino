@@ -2,8 +2,7 @@
 int dataPin = 9;
 int clockPin = 8;
 int rclockPin = 7;
-
-
+byte keypadPin = 0;  // analog0 
 
 void shiftOutByte( byte b)
 {
@@ -130,6 +129,28 @@ void blankDisplay( byte segData[])
   for( byte i = 0; i < 8; i += 1)
     segData[i] = 0x00;
 }
+
+byte scanKeypad()
+{
+  int val = analogRead(keypadPin) / 10;
+
+  byte buttonValues[] = { 0, 4, 8, 13, 18, 22, 27, 31, 36, 41, 45, 50, 54, 59, 64, 68, 73, 1023 };  // the 1023 is to make sure we never go out of range
+ 
+  // find which lookup values we're between 
+  byte i = 0;
+  while( val > buttonValues[i])
+    i++;
+  
+  // special case incase i == 0
+  if( i==0)
+    return 0;
+  
+  // return the index of the lookup value we're closest to
+  if( buttonValues[i] - val < val - buttonValues[i-1] )
+    return i;
+  else 
+    return i-1;
+}
   
 long int count = 1;
 long int lastTime = 0;
@@ -140,7 +161,8 @@ void loop()
   //convertLongInt( count, displayData);
   //convertFloat( sin(count/360.0), displayData);
   //convertFloat( 10.0/(count%10+1) , displayData);
-  convertFloat( pow( 3.14, count/4.0) , displayData);
+  //convertFloat( pow( 3.14, count/4.0) , displayData);
+  convertLongInt( analogRead(keypadPin)/10 + (int)scanKeypad()*1000, displayData);
   displayAllSegments(displayData);  // call this as fast as possible to avoid obvious scanning
   
   if( millis() > lastTime + 200)
