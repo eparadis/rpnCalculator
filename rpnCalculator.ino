@@ -77,6 +77,7 @@ void convertLongInt( long int num, byte segData[])
 {
   byte digit;
   long int modulo = 1;
+  byte maxDigits;
   
   // special case for 0
   if( num == 0)
@@ -86,8 +87,15 @@ void convertLongInt( long int num, byte segData[])
     return;
   }
   
+  if( num < 0)
+  {
+    maxDigits = 7;
+    segData[7] = 0b00000010;
+    num = -num;
+  } else
+    maxDigits = 8;
   
-  for( int i = 0; i<8; i += 1)
+  for( int i = 0; i<maxDigits; i += 1)
   {
     if( num < modulo && num != 0)  // we're out of digits so blank the current digit
     {

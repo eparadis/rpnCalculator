@@ -7,11 +7,11 @@ TODONE
 ------
 - four functions ( + - * / ) integer math
 - display of positive integers
+- display of negative integers
 - keypad and display
 
 TODO
 ----
-- display of negative integers
 - function key for extended operations
 - extended functions: decimal point, square, square root, multiplicative inverse, additive inverse, power
 - store stack on shutdown
